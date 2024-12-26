@@ -10,7 +10,6 @@ const jwt = require('jsonwebtoken')
 
 const multer = require('multer')
 
-
 filename = ''
 
 const mystorage = multer.diskStorage({
@@ -24,7 +23,6 @@ const mystorage = multer.diskStorage({
 })
 
 const upload = multer({ storage: mystorage })
-
 
 router.post('/register', upload.any('image'), async (req, res) => {
     try {
@@ -79,7 +77,7 @@ router.get('/all', async (req, res) => {
 router.get('/getbyid/:id', async (req, res) => {
     try {
         id = req.params.id
-        author = await Author.findById({_id:id});
+        author = await Author.findById({ _id: id });
         res.status(200).send(author);
     } catch (error) {
         res.status(400).send(error)
@@ -89,15 +87,26 @@ router.get('/getbyid/:id', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
     try {
         id = req.params.id
-        author = await Author.findOneAndDelete({_id:id});
+        author = await Author.findOneAndDelete({ _id: id });
         res.status(200).send(author);
     } catch (error) {
         res.status(400).send(error)
     }
 })
 
-router.put('/update/:id', (req, res) => {
-
-})
+router.put('/update/:id', upload.any('image'), async (req, res) => {
+    try {
+        const id = req.params.id;
+        const data = req.body;
+        if (filename) {
+            data.image = filename;
+        }
+        const updatedAuthor = await Author.findByIdAndUpdate(id, data, { new: true });
+        filename = '';
+        res.status(200).send(updatedAuthor);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+});
 
 module.exports = router
