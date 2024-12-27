@@ -18,5 +18,5 @@ app.use('/author', authorRoute)
 app.use('/getimagearticle', express.static('./uploads/article'))
 
 app.listen(port, () => {
-    console.log('run ...', port)
+    console.log(`Server is running on port ${port}`)
 })
