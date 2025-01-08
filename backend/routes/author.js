@@ -24,6 +24,8 @@ const mystorage = multer.diskStorage({
 
 const upload = multer({ storage: mystorage })
 
+const uploadLogin = multer()
+
 router.post('/register', upload.any('image'), async (req, res) => {
     try {
         data = req.body
@@ -40,16 +42,16 @@ router.post('/register', upload.any('image'), async (req, res) => {
     }
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', uploadLogin.none(), async (req, res) => {
     try {
         data = req.body
         author = await Author.findOne({ email: data.email })
         if (!author) {
-            res.status(404).send('email or password invalid !')
+            res.status(404).send('email or password invalid ! email invalid !')
         } else {
             validPass = bcrypt.compareSync(data.password, author.password)
             if (!validPass) {
-                res.status(404).send('email or password invalid !')
+                res.status(404).send('email or password invalid ! pssword invalid !')
             } else {
                 payload = {
                     _id: author._id,

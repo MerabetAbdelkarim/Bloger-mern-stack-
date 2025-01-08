@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { register } from "../../services/authRegisterService";
-import { schemaRegister } from "../../services/schemaRegister";
+import { register } from "../../services/register/authRegisterService";
+import { schemaRegister } from "../../services/register/schemaRegister";
 import Toast from "../../components/toast/Toast";
 
 
@@ -17,6 +17,7 @@ function Register() {
     reset,
   } = useForm({
     resolver: yupResolver(schemaRegister),
+    mode: "all",
   });
 
   const onSubmit = async (data) => {
@@ -26,12 +27,12 @@ function Register() {
       for (const key in data) {
         formData.append(key, data[key]);
       }
-      await register(formData); 
-      reset(); 
-      toastRef.current("Registration successful!", true); 
+      await register(formData);
+      reset();
+      toastRef.current("Registration successful!", true);
     } catch (error) {
       console.error("Error while creating author:", error);
-      toastRef.current("Registration failed. Please try again.", false); 
+      toastRef.current(error.response.data, false);
     } finally {
       setIsLoading(false);
     }
