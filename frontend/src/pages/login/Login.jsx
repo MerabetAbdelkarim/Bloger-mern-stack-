@@ -39,12 +39,7 @@ function Login() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const formData = new FormData();
-      console.log("formData 1", formData);
-      for (const key in data) {
-        formData.append(key, data[key]);
-      }
-      await login(formData);
+      await login(data);
       reset();
       showToast("Login successful!", true);
     } catch (error) {

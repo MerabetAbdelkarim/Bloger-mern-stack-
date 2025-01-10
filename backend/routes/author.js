@@ -42,9 +42,10 @@ router.post('/register', upload.any('image'), async (req, res) => {
     }
 })
 
-router.post('/login', uploadLogin.none(), async (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         data = req.body
+        console.log("data", req)
         author = await Author.findOne({ email: data.email })
         if (!author) {
             res.status(404).send('email or password invalid ! email invalid !')
