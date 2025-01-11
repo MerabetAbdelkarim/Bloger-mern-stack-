@@ -26,6 +26,22 @@ const upload = multer({ storage: mystorage })
 
 const uploadLogin = multer()
 
+const authenticateToken = (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).send('Access denied. No token provided.');
+    }
+
+    try {
+        const decoded = jwt.verify(token, '1234567');
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(400).send('Invalid token.');
+    }
+};
+
 router.post('/register', upload.any('image'), async (req, res) => {
     try {
         data = req.body
@@ -59,7 +75,7 @@ router.post('/login', async (req, res) => {
                     email: author.email,
                     name: author.name
                 }
-                token = jwt.sign(payload, '1234567')
+                token = jwt.sign(payload, '1234567', { expiresIn: '1h' })
                 res.status(200).send({ mytoken: token })
             }
         }
@@ -68,7 +84,7 @@ router.post('/login', async (req, res) => {
     }
 })
 
-router.get('/all', async (req, res) => {
+router.get('/all', authenticateToken, async (req, res) => {
     try {
         author = await Author.find();
         res.status(200).send(author);
