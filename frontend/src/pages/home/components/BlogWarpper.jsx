@@ -1,5 +1,9 @@
+import { useContext } from "react";
+import { UserContext } from "../../../context/UserContext";
 
 function BlogWarpper() {
+    const { user } = useContext(UserContext);
+    console.log("user home", user);
     return (
         <section>
             <div className="container">

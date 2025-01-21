@@ -10,6 +10,7 @@ import Author from "../pages/author/Author"
 import Login from "../pages/login/Login"
 import Register from "../pages/register/Register"
 import NotFound from "../pages/notfound/NotFound"
+import ProtectedRoute from './ProtectedRoute';
 function Router() {
     return (
         <>
@@ -19,7 +20,15 @@ function Router() {
                     <Route path="/" element={<Home />} />
                     <Route path="/article/:id" element={<Detail />} />
                     <Route path="/about" element={<About />} />
-                    <Route path="/createarticle" element={<CreateArticle />} />
+
+                    <Route
+                        path="/createarticle"
+                        element={
+                            <ProtectedRoute>
+                                <CreateArticle />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/author/:id" element={<Author />} />
@@ -30,7 +39,6 @@ function Router() {
                     <Route path="*" element={<NotFound />} />
 
                 </Route>
-
 
             </Routes>
         </>
