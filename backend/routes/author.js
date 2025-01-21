@@ -42,6 +42,16 @@ const authenticateToken = (req, res, next) => {
     }
 };
 
+router.get('/profile', authenticateToken, async (req, res) => {
+    try {
+        console.log("open rout")
+        author = await Author.findById(req.user._id);
+        res.status(200).send(author);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+});
+
 router.post('/register', upload.any('image'), async (req, res) => {
     try {
         data = req.body
@@ -61,7 +71,6 @@ router.post('/register', upload.any('image'), async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         data = req.body
-        console.log("data", req)
         author = await Author.findOne({ email: data.email })
         if (!author) {
             res.status(404).send('email or password invalid ! email invalid !')

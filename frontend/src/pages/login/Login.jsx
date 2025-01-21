@@ -1,12 +1,16 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { schemaLogin } from "../../services/login/schemaLogin";
 import { login } from "../../services/login/authLoginService";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/UserContext";
 
 function Login() {
+  const {loginContext} = useContext(UserContext)
   const toastRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -39,9 +43,11 @@ function Login() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await login(data);
+      const token = await login(data);
+      loginContext({ token });
       reset();
       showToast("Login successful!", true);
+      navigate("/");
     } catch (error) {
       console.error("Login Error:", error.response.data);
       showToast(error.response.data, false);
