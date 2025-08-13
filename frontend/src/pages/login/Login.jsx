@@ -1,10 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { schemaLogin } from "../../services/login/schemaLogin";
-import { login } from "../../services/login/authLoginService";
+import { authLoginService } from "../../services/login/authLoginService";
+import { AuthContext } from "../../services/AuthContext";
 
 function Login() {
+  const { login } = useContext(AuthContext);
   const toastRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -37,8 +39,8 @@ function Login() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const token = await login(data);
-      localStorage.setItem("token", token);
+      const token = await authLoginService(data);
+      login(token);
       reset();
       showToast("Login successful!", true);
     } catch (error) {
