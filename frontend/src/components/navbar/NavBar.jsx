@@ -1,6 +1,7 @@
+/* eslint-disable react/prop-types */
 import { NavLink } from "react-router-dom";
 
-function NavBar() {
+function NavBar({ isLoggedIn }) {
   return (
     <>
       <div className="header-height-fix"></div>
@@ -26,21 +27,28 @@ function NavBar() {
                       <NavLink exact className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/">Home</NavLink>
                     </li>
                     <li className="nav-item">
-                      <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}  to="/about">About</NavLink>
+                      <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/about">About</NavLink>
                     </li>
                     <li className="nav-item">
-                      <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}  to="/privacy">Privacy</NavLink>
+                      <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/privacy">Privacy</NavLink>
                     </li>
-                    <li className="nav-item ">
-                      <NavLink className="nav-link "  to="/author/1">My account</NavLink>
-                    </li>
+                    {
+                      isLoggedIn ? (
+                        <li className="nav-item ">
+                          <NavLink className="nav-link " to="/author/1">My account</NavLink>
+                        </li>
+                      ) : (<>
+                        <NavLink to="/login" className="btn btn-primary btn-sm ms-2 ">Login</NavLink>
+                        <NavLink to="/register" className="btn btn-primary btn-sm ms-2">Register</NavLink>
+                      </>)
+                    }
                   </ul>
                 </div>
               </nav>
             </div>
           </div>
-        </div>
-      </header>
+        </div >
+      </header >
     </>
   )
 }

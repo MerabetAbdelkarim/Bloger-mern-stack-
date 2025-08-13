@@ -29,8 +29,6 @@ function Login() {
 
       toastElement.classList.remove("bg-success", "bg-danger");
       toastElement.classList.add(isSuccess ? "bg-success" : "bg-danger");
-
-      // عرض Toast
       const toast = new window.bootstrap.Toast(toastElement);
       toast.show();
     }
@@ -39,7 +37,8 @@ function Login() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await login(data);
+      const token = await login(data);
+      localStorage.setItem("token", token);
       reset();
       showToast("Login successful!", true);
     } catch (error) {
