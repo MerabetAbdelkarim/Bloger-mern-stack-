@@ -1,7 +1,15 @@
 /* eslint-disable react/prop-types */
 import { NavLink } from "react-router-dom";
+import { useState } from "react";
 
 function NavBar({ isLoggedIn }) {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  };
+
   return (
     <>
       <div className="header-height-fix"></div>
@@ -33,10 +41,17 @@ function NavBar({ isLoggedIn }) {
                       <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/privacy">Privacy</NavLink>
                     </li>
                     {
-                      isLoggedIn ? (
+                      isLoggedIn ? (<>
                         <li className="nav-item ">
                           <NavLink className="nav-link " to="/author/1">My account</NavLink>
                         </li>
+                        <button
+                          className="btn btn-danger btn-sm ms-2"
+                          onClick={() => setShowLogoutModal(true)}
+                        >
+                          Logout
+                        </button>
+                      </>
                       ) : (<>
                         <NavLink to="/login" className="btn btn-primary btn-sm ms-2 ">Login</NavLink>
                         <NavLink to="/register" className="btn btn-primary btn-sm ms-2">Register</NavLink>
@@ -49,6 +64,26 @@ function NavBar({ isLoggedIn }) {
           </div>
         </div >
       </header >
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="modal show" style={{ display: "block", background: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Logout</h5>
+                <button type="button" className="btn-close" onClick={() => setShowLogoutModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to log out?</p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setShowLogoutModal(false)}>Cancel</button>
+                <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
