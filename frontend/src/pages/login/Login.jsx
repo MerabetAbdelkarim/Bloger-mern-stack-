@@ -4,11 +4,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { schemaLogin } from "../../services/login/schemaLogin";
 import { authLoginService } from "../../services/login/authLoginService";
 import { AuthContext } from "../../services/AuthContext";
+import { useNavigate } from 'react-router-dom';
+import { ToastContext } from "../../assets/plugins/Toast/ToastProvider";
 
 function Login() {
   const { login } = useContext(AuthContext);
   const toastRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -20,22 +23,7 @@ function Login() {
     mode: "all",
   });
 
-  const showToast = (message, isSuccess) => {
-    const toastElement = toastRef.current;
-    if (toastElement) {
-      const toastBody = toastElement.querySelector(".toast-body");
-      const toastHeader = toastElement.querySelector(".toast-header strong");
-
-      toastBody.textContent = message;
-      toastHeader.textContent = isSuccess ? "Success" : "Error";
-
-      toastElement.classList.remove("bg-success", "bg-danger");
-      toastElement.classList.add(isSuccess ? "bg-success" : "bg-danger");
-      const toast = new window.bootstrap.Toast(toastElement);
-      toast.show();
-    }
-  };
-
+  const { showToast } = useContext(ToastContext);
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
@@ -43,9 +31,14 @@ function Login() {
       login(token);
       reset();
       showToast("Login successful!", true);
+      navigate('/');
     } catch (error) {
-      console.error("Login Error:", error.response.data);
-      showToast(error.response.data, false);
+      console.error("Login Error:", error);
+      if (error.code === "ERR_NETWORK") {
+        showToast("Server is under maintenance. Please try again later.", false);
+      } else {
+        showToast(error.response?.data || "An error occurred during login.", false);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +73,7 @@ function Login() {
       <div className="toast-container position-fixed bottom-0 end-0 p-3">
         <div
           ref={toastRef}
-          className="toast"
+          className="toast toast-custom"
           role="alert"
           aria-live="assertive"
           aria-atomic="true"
