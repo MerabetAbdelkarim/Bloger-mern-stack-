@@ -1,13 +1,19 @@
 /* eslint-disable react/prop-types */
-import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { ToastContext } from "../../assets/plugins/Toast/ToastProvider";
+import { AuthContext } from "../../services/AuthContext";
 
 function NavBar({ isLoggedIn }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-
+  const navigate = useNavigate();
+  const { showToast } = useContext(ToastContext);
+  const { logout } = useContext(AuthContext);
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.reload();
+    logout();
+    showToast("Logout successful! ", true);
+    navigate('/');
+    setShowLogoutModal(false);
   };
 
   return (
