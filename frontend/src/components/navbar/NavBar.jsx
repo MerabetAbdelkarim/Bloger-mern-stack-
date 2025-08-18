@@ -40,6 +40,9 @@ function NavBar({ isLoggedIn }) {
                     <li className="nav-item ">
                       <NavLink exact className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/">Home</NavLink>
                     </li>
+                    <li className="nav-item ">
+                      <NavLink exact className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/articles">Posts</NavLink>
+                    </li>
                     <li className="nav-item">
                       <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/about">About</NavLink>
                     </li>

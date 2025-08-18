@@ -1,15 +1,16 @@
 
 import { Route, Routes } from 'react-router-dom'
 import Layout from "../components/layout/Layout";
-import Home from "../pages/home/Home"
-import Detail from "../pages/detail/Detail"
-import About from "../pages/about/About"
-import CreateArticle from "../pages/createarticle/CreateArticle"
-import Privacy from "../pages/privacy/Privacy"
-import Author from "../pages/author/Author"
-import Login from "../pages/login/Login"
-import Register from "../pages/register/Register"
-import NotFound from "../pages/notfound/NotFound"
+import Home from "../pages/home"
+import Articles from "../pages/Articles"
+import Detail from "../pages/detail"
+import About from "../pages/about"
+import CreateArticle from "../pages/createarticle"
+import Privacy from "../pages/privacy"
+import Author from "../pages/author"
+import Login from "../pages/login"
+import Register from "../pages/register"
+import NotFound from "../pages/notfound"
 function Router() {
     return (
         <>
@@ -17,6 +18,8 @@ function Router() {
                 <Route element={<Layout />}>
 
                     <Route path="/" element={<Home />} />
+
+                    <Route path="/articles" element={<Articles />} />
                     <Route path="/article/:id" element={<Detail />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/createarticle" element={<CreateArticle />} />
