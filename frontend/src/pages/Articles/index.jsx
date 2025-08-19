@@ -4,13 +4,6 @@ const Posts = () => {
     return (
         <section>
             <div className="container">
-                <div className="row">
-                    <div className="col-12 text-center">
-                        <h2 className="section-title">
-                            <span>Recent posts</span>
-                        </h2>
-                    </div>
-                </div>
                 <div className="row gy-5 gx-4 g-xl-5">
                     <div className="col-lg-6">
                         <article className="card post-card h-100 border-0 bg-transparent">
