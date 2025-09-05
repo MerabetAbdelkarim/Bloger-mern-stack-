@@ -4,11 +4,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { register } from "../../services/register/authRegisterService";
 import { schemaRegister } from "../../services/register/schemaRegister";
 import Toast from "../../components/toast/Toast";
+import { useNavigate } from "react-router-dom";
 
 
 function Register() {
   const toastRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register: registerForm,
@@ -30,6 +32,7 @@ function Register() {
       await register(formData);
       reset();
       toastRef.current("Registration successful!", true);
+      navigate('/login');
     } catch (error) {
       console.error("Error while creating author:", error);
       toastRef.current(error.response.data, false);

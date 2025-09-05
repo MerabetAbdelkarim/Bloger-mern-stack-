@@ -280,7 +280,7 @@ const Posts = () => {
                         </article>
                     </div>
                     <div className="col-12 text-center">
-                        <a className="btn btn-primary mt-5" href="blog.html" aria-label="View all posts"><i className="ti ti-new-section me-2"></i>View all posts</a>
+                        <a className="btn btn-primary mt-5" href="blog.html" aria-label="View all posts"> <i className="ti ti-new-section me-2"></i>  View more posts</a>
                     </div>
                 </div>
             </div>
