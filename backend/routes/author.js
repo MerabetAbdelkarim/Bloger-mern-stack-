@@ -4,130 +4,80 @@ const Author = require("../models/author");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
+const auth = require("../middlewares/auth");
+const sharp = require("sharp");
+const fs = require("fs");
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+router.post("/register", upload.single("image"), async (req, res) => {
+  try {
+    const data = req.body;
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(data.password, salt);
+    let finalImageName = null;
+    if (req.file) {
+      const uniqueName = Date.now() + ".jpg";
+      if (!fs.existsSync("./uploads/authors"))
+        fs.mkdirSync("./uploads/authors");
+      if (!fs.existsSync("./uploads/authors/original"))
+        fs.mkdirSync("./uploads/authors/original");
+      if (!fs.existsSync("./uploads/authors/profile"))
+        fs.mkdirSync("./uploads/authors/profile");
+      if (!fs.existsSync("./uploads/authors/avatar"))
+        fs.mkdirSync("./uploads/authors/avatar");
+      await sharp(req.file.buffer)
+        .jpeg({ quality: 95 })
+        .toFile(`./uploads/authors/original/${uniqueName}`);
+      await sharp(req.file.buffer)
+        .resize(300, 300)
+        .jpeg({ quality: 90 })
+        .toFile(`./uploads/authors/profile/${uniqueName}`);
+      await sharp(req.file.buffer)
+        .resize(60, 60)
+        .jpeg({ quality: 85 })
+        .toFile(`./uploads/authors/avatar/${uniqueName}`);
 
-let filename = "";
-
-const mystorage = multer.diskStorage({
-    destination: "./uploads/article",
-    filename: (req, file, redirect) => {
-        let date = Date.now();
-        let fl = date + "." + file.mimetype.split("/")[1];
-        redirect(null, fl);
-        filename = fl;
-    },
-});
-
-const upload = multer({ storage: mystorage });
-
-const authMiddleware = (req, res, next) => {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) {
-        return res.status(401).send("Access denied, no token provided.");
+      finalImageName = uniqueName;
     }
-    try {
-        const decoded = jwt.verify(token, "1234567"); // نفس السر المستخدم في login
-        req.user = decoded; // حفظ بيانات المستخدم في الطلب
-        next();
-    } catch (error) {
-        res.status(400).send("Invalid token");
-    }
-};
-
-router.post("/register", upload.any("image"), async (req, res) => {
-    try {
-        const data = req.body;
-        let author = new Author(data);
-        author.image = filename;
-        const salt = bcrypt.genSaltSync(10);
-        const cryptPass = bcrypt.hashSync(data.password, salt);
-        author.password = cryptPass;
-        const savedAuthor = await author.save();
-        filename = "";
-        res.status(200).send(savedAuthor);
-    } catch (error) {
-        res.status(400).send(error);
-    }
+    const author = new Author({
+      ...data,
+      password: hashedPassword,
+      image: finalImageName,
+    });
+    const savedAuthor = await author.save();
+    res.status(200).send(savedAuthor);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error);
+  }
 });
 
 router.post("/login", async (req, res) => {
-    try {
-        const data = req.body;
-        const author = await Author.findOne({ email: data.email });
-        if (!author) {
-            return res.status(404).send("email or password invalid ! email invalid !");
-        }
+  try {
+    const data = req.body;
+    const author = await Author.findOne({ email: data.email });
+    if (!author) return res.status(404).send("Invalid email or password");
+    const valid = bcrypt.compareSync(data.password, author.password);
+    if (!valid) return res.status(404).send("Invalid email or password");
+    const token = jwt.sign(
+      { _id: author._id, email: author.email, name: author.name },
+      "1234567",
+      { expiresIn: "7d" }
+    );
 
-        const validPass = bcrypt.compareSync(data.password, author.password);
-        if (!validPass) {
-            return res.status(404).send("email or password invalid ! password invalid !");
-        }
-
-        const payload = {
-            _id: author._id,
-            email: author.email,
-            name: author.name,
-        };
-        const token = jwt.sign(payload, "1234567");
-        res.status(200).send({ mytoken: token });
-    } catch (error) {
-        res.status(400).send(error);
-    }
+    res.status(200).send({ token });
+  } catch (error) {
+    res.status(400).send(error);
+  }
 });
 
-router.get("/profile", authMiddleware, async (req, res) => {
-    try {
-        const author = await Author.findById(req.user._id).select("-password");
-        if (!author) {
-            return res.status(404).send("User not found");
-        }
-        res.status(200).send(author);
-    } catch (error) {
-        res.status(400).send(error);
-    }
-});
-
-router.get("/all", async (req, res) => {
-    try {
-        const authors = await Author.find();
-        res.status(200).send(authors);
-    } catch (error) {
-        res.status(400).send(error);
-    }
-});
-
-router.get("/getbyid/:id", async (req, res) => {
-    try {
-        const id = req.params.id;
-        const author = await Author.findById({ _id: id });
-        res.status(200).send(author);
-    } catch (error) {
-        res.status(400).send(error);
-    }
-});
-
-router.delete("/delete/:id", async (req, res) => {
-    try {
-        const id = req.params.id;
-        const author = await Author.findOneAndDelete({ _id: id });
-        res.status(200).send(author);
-    } catch (error) {
-        res.status(400).send(error);
-    }
-});
-
-router.put("/update/:id", upload.any("image"), async (req, res) => {
-    try {
-        const id = req.params.id;
-        const data = req.body;
-        if (filename) {
-            data.image = filename;
-        }
-        const updatedAuthor = await Author.findByIdAndUpdate(id, data, { new: true });
-        filename = "";
-        res.status(200).send(updatedAuthor);
-    } catch (error) {
-        res.status(400).send(error);
-    }
+router.get("/me", auth, async (req, res) => {
+  try {
+    const author = await Author.findById(req.user._id).select("-password");
+    res.status(200).send(author);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 });
 
 module.exports = router;

@@ -27,7 +27,13 @@ function Register() {
     try {
       const formData = new FormData();
       for (const key in data) {
-        formData.append(key, data[key]);
+        if (key === "image") {
+          if (data.image && data.image[0]) {
+            formData.append("image", data.image[0]);
+          }
+        } else {
+          formData.append(key, data[key]);
+        }
       }
       await register(formData);
       reset();

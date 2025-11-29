@@ -1,100 +1,118 @@
 /* eslint-disable react/prop-types */
 import { NavLink, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
-import { ToastContext } from "../../assets/plugins/Toast/ToastProvider";
 import { AuthContext } from "../../services/AuthContext";
+import "./NavBar.css";
 
-function NavBar({ isLoggedIn }) {
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+function NavBar() {
   const navigate = useNavigate();
-  const { showToast } = useContext(ToastContext);
-  const { logout } = useContext(AuthContext);
+  const { user, isLoggedIn, logout } = useContext(AuthContext);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const authenticated = !!isLoggedIn;
+
+  const userName = user ? `${user.name} ${user.lastname}` : "";
+
+  const avatarLetter = userName.charAt(0).toUpperCase();
+
+  const links = [
+    { label: "Home", to: "/" },
+    { label: "Blog", to: "/articles" },
+    { label: "About", to: "/about" },
+    { label: "Contact", to: "/privacy" },
+  ];
+
   const handleLogout = () => {
     logout();
-    showToast("Logout successful! ", true);
-    navigate('/');
-    setShowLogoutModal(false);
+    setMenuOpen(false);
+    navigate("/");
   };
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <>
-      <div className="header-height-fix"></div>
-      <header className="header-nav">
-        <div className="container">
-          <div className="row">
-            <div className="col-12">
-              <nav className="navbar navbar-expand-lg navbar-light p-0">
-                <a className="navbar-brand font-weight-bold mb-0" href="index-2.html" title="Qurno">
-                  <img className="img-fluid" width="110" height="35" src="src/assets/assets/images/logo.png" alt="Qurno" />
-                </a>
-                <button className="search-toggle d-inline-block d-lg-none ms-auto me-1 me-sm-3" data-toggle="search" aria-label="Search Toggle">
-                  <span>Search</span>
-                  <svg width="22" height="22" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 15.5L19 19" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 11C5 14.3137 7.68629 17 11 17C12.6597 17 14.1621 16.3261 15.2483 15.237C16.3308 14.1517 17 12.654 17 11C17 7.68629 14.3137 5 11 5C7.68629 5 5 7.68629 5 11Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                </button>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navHeader" aria-controls="navHeader" aria-expanded="false" aria-label="Toggle navigation">
-                  <i className="ti ti-menu-2 d-inline"></i>
-                  <i className="ti ti-x d-none"></i>
-                </button>
-                <div className="collapse navbar-collapse" id="navHeader">
-                  <ul className="navbar-nav mx-auto">
-                    <li className="nav-item ">
-                      <NavLink exact className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/">Home</NavLink>
-                    </li>
-                    <li className="nav-item ">
-                      <NavLink exact className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/articles">Posts</NavLink>
-                    </li>
-                    <li className="nav-item">
-                      <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/about">About</NavLink>
-                    </li>
-                    <li className="nav-item">
-                      <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} to="/privacy">Privacy</NavLink>
-                    </li>
-                    {
-                      isLoggedIn ? (<>
-                        <li className="nav-item ">
-                          <NavLink className="nav-link " to="/author/1">My account</NavLink>
-                        </li>
-                        <button
-                          className="btn btn-danger btn-sm ms-2"
-                          onClick={() => setShowLogoutModal(true)}
-                        >
-                          Logout
-                        </button>
-                      </>
-                      ) : (<>
-                        <NavLink to="/login" className="btn btn-primary btn-sm ms-2 ">Login</NavLink>
-                        <NavLink to="/register" className="btn btn-primary btn-sm ms-2">Register</NavLink>
-                      </>)
-                    }
-                  </ul>
+    <header className="app-navbar">
+      <div className="nav-container">
+
+        <div className="brand" onClick={() => { navigate("/"); closeMenu(); }}>
+          <span className="brand-mark" />
+          <span className="brand-text">Qurno</span>
+        </div>
+
+        <button
+          className="menu-toggle"
+          aria-label="Toggle navigation"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((prev) => !prev)}
+        >
+          <span className="bar" />
+          <span className="bar" />
+          <span className="bar" />
+        </button>
+
+        <div className={`nav-main ${menuOpen ? "open" : ""}`}>
+
+          <ul className="nav-links">
+            {links.map((link) => (
+              <li key={link.to}>
+                <NavLink
+                  to={link.to}
+                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                  onClick={closeMenu}
+                >
+                  {link.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          <div className="nav-actions">
+
+            {!authenticated && (
+              <>
+                <NavLink className="btn ghost" to="/login" onClick={closeMenu}>
+                  Login
+                </NavLink>
+                <NavLink className="btn solid" to="/register" onClick={closeMenu}>
+                  Register
+                </NavLink>
+              </>
+            )}
+
+            {authenticated && (
+              <>
+                <div className="user-chip" title={userName}>
+                  {user?.image ? (
+                    <img
+                      src={`${import.meta.env.VITE_API_URL}/getimageauthor/avatar/${user.image}`}
+                      alt="avatar"
+                      className="avatar-image"
+                    />
+                  ) : (
+                    <span className="avatar">{avatarLetter}</span>
+                  )}
+                  <span className="user-name">{userName}</span>
                 </div>
-              </nav>
-            </div>
-          </div>
-        </div >
-      </header >
-      {/* Logout Confirmation Modal */}
-      {showLogoutModal && (
-        <div className="modal show" style={{ display: "block", background: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Logout</h5>
-                <button type="button" className="btn-close" onClick={() => setShowLogoutModal(false)}></button>
-              </div>
-              <div className="modal-body">
-                <p>Are you sure you want to log out?</p>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={() => setShowLogoutModal(false)}>Cancel</button>
-                <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
-              </div>
-            </div>
+
+                <NavLink
+                  to={"/dashboard"}
+                  className="btn ghost"
+                  onClick={closeMenu}
+                >
+                  Dashboard
+                </NavLink>
+
+                <button type="button" className="btn solid" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
+            )}
+
           </div>
         </div>
-      )}
-    </>
-  )
+      </div>
+    </header>
+  );
 }
 
 export default NavBar;

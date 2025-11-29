@@ -18,6 +18,7 @@ app.use('/author', authorRoute)
 
 
 app.use('/getimagearticle', express.static('./uploads/article'))
+app.use('/getimageauthor', express.static('./uploads/authors'));
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`)
